@@ -64,7 +64,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --prefix "$GODOT_DIR/tools" --no-audit --no-fund
+          npm install --prefix "$GODOT_DIR/tools" --no-audit --no-fund --ignore-scripts
+          test -d "$GODOT_DIR/tools/node_modules/@gltf-transform/core"
+          test -d "$GODOT_DIR/tools/node_modules/@gltf-transform/extensions"
+          test -d "$GODOT_DIR/tools/node_modules/draco3dgltf"
           mkdir -p /tmp/realm-wars-models
           for spec in \
             "town-center/stage1.glb" \
@@ -73,7 +76,8 @@ jobs:
             input="$GODOT_DIR/assets/$spec"
             output="/tmp/realm-wars-models/$(basename "$spec")"
             test -s "$input"
-            node "$GODOT_DIR/tools/decompress-glb.mjs" "$input" "$output"
+            timeout 120 node "$GODOT_DIR/tools/decompress-glb.mjs" "$input" "$output"
+            test -s "$output"
           done
           cp /tmp/realm-wars-models/stage1.glb "$GODOT_DIR/assets/town-center/stage1.glb"
           cp /tmp/realm-wars-models/tree.glb "$GODOT_DIR/assets/resources/tree.glb"
