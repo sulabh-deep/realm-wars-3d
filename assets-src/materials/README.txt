@@ -1,1 +1,0 @@
-Material pass is applied at runtime in index.html until the source GLBs are rebuilt with authored Blender materials. Town Center gets sandstone/wood/turquoise classification; trees get trunk/foliage colors; gold veins get metallic gold material.
