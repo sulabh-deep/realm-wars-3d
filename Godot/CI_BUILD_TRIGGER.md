@@ -1,0 +1,1 @@
+CI trigger marker. This file exists only to force a fresh Web build after the strict GDScript typing fix.
