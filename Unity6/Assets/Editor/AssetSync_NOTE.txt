@@ -1,0 +1,1 @@
+Asset sync: the editor setup mirrors generated GLBs from ../assets into Assets/Resources/Models. Use Realm Wars > Sync Source 3D Assets after opening the Unity project.
