@@ -29,7 +29,7 @@ jobs:
   build-web:
     name: Playable Web build
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -63,24 +63,14 @@ jobs:
           rm -f "$GODOT_DIR"/assets/resources/*.glb
           echo 'Using the procedural fallback visuals for the CI smoke build.'
 
-      - name: Import project
+      - name: Import project and scan scripts
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p "$GODOT_DIR/$OUTPUT_DIR"
-          godot --headless --path "$GODOT_DIR" --editor --quit 2>&1 | tee /tmp/godot-import.log
-          if grep -qE '^ERROR:' /tmp/godot-import.log; then
-            echo 'Godot reported import errors.'
-            exit 1
-          fi
-
-      - name: Validate project
-        shell: bash
-        run: |
-          set -euo pipefail
-          godot --headless --path "$GODOT_DIR" --check-only 2>&1 | tee /tmp/godot-check.log
-          if grep -qE 'SCRIPT ERROR:|Parse Error:|ERROR: Failed to load script' /tmp/godot-check.log; then
-            echo 'Godot project validation reported script errors.'
+          timeout 5m godot --headless --path "$GODOT_DIR" --editor --quit 2>&1 | tee /tmp/godot-import.log
+          if grep -qE '(^ERROR:|^SCRIPT ERROR:|Parse Error:|ERROR: Failed to load script)' /tmp/godot-import.log; then
+            echo 'Godot reported import or script errors.'
             exit 1
           fi
 
@@ -89,8 +79,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$GODOT_DIR/$OUTPUT_DIR"
-          godot --headless --path "$GODOT_DIR" --export-release Web "$OUTPUT_DIR/RealmWars3D.html" 2>&1 | tee /tmp/godot-export.log
-          if grep -qE 'ERROR:|SCRIPT ERROR:|Parse Error:' /tmp/godot-export.log; then
+          timeout 10m godot --headless --path "$GODOT_DIR" --export-release Web "$OUTPUT_DIR/RealmWars3D.html" 2>&1 | tee /tmp/godot-export.log
+          if grep -qE '(^ERROR:|^SCRIPT ERROR:|Parse Error:|ERROR: Failed to load script)' /tmp/godot-export.log; then
             echo 'Godot export reported errors.'
             exit 1
           fi
