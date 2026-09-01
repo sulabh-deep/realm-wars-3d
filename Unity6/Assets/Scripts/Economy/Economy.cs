@@ -32,9 +32,16 @@ namespace RealmWars3D
             return true;
         }
 
-        public bool TryAddPopulation(ResourceCost cost, Action<Vector3> spawn = null)
+        public bool TryAddPopulation(ResourceCost cost)
         {
             if (Population >= PopulationCap || !Spend(cost)) return false;
+            Population++;
+            return true;
+        }
+
+        public bool TryConsumePopulationSlot()
+        {
+            if (Population >= PopulationCap) return false;
             Population++;
             return true;
         }
