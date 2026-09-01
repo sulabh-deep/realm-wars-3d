@@ -36,12 +36,24 @@ jobs:
           echo "$BLENDER_DIR" >> "$GITHUB_PATH"
 
       - name: Process GLB assets
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p assets
           blender -b --python blender/process_assets.py
 
+          # Do not allow a green workflow when the processor produced nothing.
+          count=$(find assets -type f -name '*.glb' | wc -l)
+          if [ "$count" -eq 0 ]; then
+            echo "ERROR: Blender completed but produced no GLB assets."
+            exit 1
+          fi
+          echo "Verified $count processed GLB asset(s)."
+
       - name: Commit processed assets
+        shell: bash
         run: |
+          set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add assets
