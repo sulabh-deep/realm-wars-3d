@@ -6,15 +6,19 @@ on:
     paths:
       - 'Godot/**'
       - '.github/workflows/godot-web.yml'
+      - '.github/workflows/deploy-pages.yml'
   pull_request:
     branches: [godot-migration]
     paths:
       - 'Godot/**'
       - '.github/workflows/godot-web.yml'
+      - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: godot-web-${{ github.ref }}
@@ -27,7 +31,7 @@ env:
 
 jobs:
   build-web:
-    name: Playable Web build
+    name: Build and deploy Web
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -61,16 +65,16 @@ jobs:
           set -euo pipefail
           rm -f "$GODOT_DIR"/assets/town-center/*.glb
           rm -f "$GODOT_DIR"/assets/resources/*.glb
-          echo 'Using the procedural fallback visuals for the CI smoke build.'
+          echo 'Using procedural fallback visuals for the CI web build.'
 
-      - name: Import project and scan scripts
+      - name: Import project
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p "$GODOT_DIR/$OUTPUT_DIR"
-          timeout 5m godot --headless --path "$GODOT_DIR" --editor --quit 2>&1 | tee /tmp/godot-import.log
-          if grep -qE '(^ERROR:|^SCRIPT ERROR:|Parse Error:|ERROR: Failed to load script)' /tmp/godot-import.log; then
-            echo 'Godot reported import or script errors.'
+          timeout 300 godot --headless --path "$GODOT_DIR" --editor --quit 2>&1 | tee /tmp/godot-import.log
+          if grep -qE '^ERROR:|SCRIPT ERROR:|Parse Error:|ERROR: Failed to load script' /tmp/godot-import.log; then
+            echo 'Godot reported import/script errors.'
             exit 1
           fi
 
@@ -79,18 +83,22 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$GODOT_DIR/$OUTPUT_DIR"
-          timeout 10m godot --headless --path "$GODOT_DIR" --export-release Web "$OUTPUT_DIR/RealmWars3D.html" 2>&1 | tee /tmp/godot-export.log
-          if grep -qE '(^ERROR:|^SCRIPT ERROR:|Parse Error:|ERROR: Failed to load script)' /tmp/godot-export.log; then
-            echo 'Godot export reported errors.'
+          timeout 600 godot --headless --path "$GODOT_DIR" --export-release Web "$OUTPUT_DIR/index.html" 2>&1 | tee /tmp/godot-export.log
+          if grep -qE 'SCRIPT ERROR:|Parse Error:|ERROR: Failed to load script' /tmp/godot-export.log; then
+            echo 'Godot export reported script errors.'
             exit 1
           fi
-          test -s "$GODOT_DIR/$OUTPUT_DIR/RealmWars3D.html"
+          test -s "$GODOT_DIR/$OUTPUT_DIR/index.html"
           find "$GODOT_DIR/$OUTPUT_DIR" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort
 
-      - name: Upload playable Web build
-        uses: actions/upload-artifact@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: RealmWars3D-Web-${{ github.sha }}
           path: Godot/build/web
-          if-no-files-found: error
-          retention-days: 14
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
