@@ -11,6 +11,10 @@ on:
 permissions:
   contents: write
 
+env:
+  BLENDER_VERSION: '4.5.13'
+  BLENDER_DIR: '${{ github.workspace }}/.blender'
+
 jobs:
   process-assets:
     runs-on: ubuntu-latest
@@ -20,10 +24,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Blender
-        uses: blender-actions/setup-blender@v2
-        with:
-          version: '4.5.3'
+      - name: Download Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://download.blender.org/release/Blender4.5/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          curl -fL --retry 3 "$url" -o /tmp/blender.tar.xz
+          mkdir -p "$BLENDER_DIR"
+          tar -xJf /tmp/blender.tar.xz -C "$BLENDER_DIR" --strip-components=1
+          "$BLENDER_DIR/blender" --version
+          echo "$BLENDER_DIR" >> "$GITHUB_PATH"
 
       - name: Process GLB assets
         run: |
