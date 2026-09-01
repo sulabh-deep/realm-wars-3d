@@ -1,0 +1,76 @@
+name: Godot Web Build
+
+on:
+  push:
+    branches: [godot-migration]
+    paths:
+      - 'Godot/**'
+      - '.github/workflows/godot-web.yml'
+  pull_request:
+    branches: [godot-migration]
+    paths:
+      - 'Godot/**'
+      - '.github/workflows/godot-web.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-web-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: '4.5.2'
+  GODOT_DIR: Godot
+  OUTPUT_DIR: build/web
+
+jobs:
+  build-web:
+    name: Playable Web build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Install Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          curl -fL --retry 3 "$url" -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          install -m 0755 "/tmp/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
+          godot --version
+
+      - name: Import project
+        shell: bash
+        run: |
+          set -euo pipefail
+          godot --headless --path "$GODOT_DIR" --editor --quit
+
+      - name: Validate project
+        shell: bash
+        run: |
+          set -euo pipefail
+          godot --headless --path "$GODOT_DIR" --check-only --quit
+
+      - name: Export Web
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUTPUT_DIR"
+          godot --headless --path "$GODOT_DIR" --export-release Web "$OUTPUT_DIR/index.html"
+          test -s "$OUTPUT_DIR/index.html"
+          find "$OUTPUT_DIR" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort
+
+      - name: Upload playable Web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: RealmWars3D-Web-${{ github.sha }}
+          path: build/web
+          if-no-files-found: error
+          retention-days: 14
