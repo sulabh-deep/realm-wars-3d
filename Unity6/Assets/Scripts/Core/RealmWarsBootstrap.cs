@@ -7,7 +7,6 @@ namespace RealmWars3D
     {
         private static readonly Color GroundColor = new(0.47f, 0.64f, 0.35f);
         private readonly List<Transform> selection = new();
-
         private Economy economy;
         private RTSCameraController rtsCamera;
 
@@ -15,11 +14,14 @@ namespace RealmWars3D
         {
             Application.targetFrameRate = 60;
             QualitySettings.vSyncCount = 0;
-
             BuildLighting();
             BuildGround();
             BuildCamera();
             BuildGameState();
+            var input = new GameObject("RTS Input");
+            input.AddComponent<RTSSelectionController>();
+            var hud = new GameObject("RTS HUD").AddComponent<RTSHUD>();
+            hud.Initialize(economy);
         }
 
         private void BuildLighting()
@@ -29,7 +31,6 @@ namespace RealmWars3D
             hemi.intensity = 0.65f;
             hemi.color = new Color(0.87f, 0.94f, 1f);
             hemi.transform.rotation = Quaternion.Euler(50f, -35f, 0f);
-
             var sun = new GameObject("Sun").AddComponent<Light>();
             sun.type = LightType.Directional;
             sun.intensity = 1.0f;
@@ -42,8 +43,7 @@ namespace RealmWars3D
             var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
             ground.name = "Ground";
             ground.transform.localScale = new Vector3(11f, 1f, 11f);
-            var renderer = ground.GetComponent<MeshRenderer>();
-            renderer.sharedMaterial = MakeMaterial(GroundColor);
+            ground.GetComponent<MeshRenderer>().sharedMaterial = MakeMaterial(GroundColor);
         }
 
         private void BuildCamera()
@@ -55,7 +55,6 @@ namespace RealmWars3D
             camera.nearClipPlane = 0.1f;
             camera.farClipPlane = 500f;
             cameraObject.tag = "MainCamera";
-
             rtsCamera = cameraObject.AddComponent<RTSCameraController>();
             rtsCamera.Initialize(camera);
         }
@@ -64,24 +63,20 @@ namespace RealmWars3D
         {
             var stateObject = new GameObject("Game State");
             economy = stateObject.AddComponent<Economy>();
-
             CreateTownCenter("Player Town Center", Vector3.zero, 0);
             CreateTownCenter("Enemy Town Center", new Vector3(32f, 0f, -24f), 1);
-
             for (int i = 0; i < 12; i++)
             {
                 float x = Random.Range(-50f, 50f);
                 float z = Random.Range(-40f, 40f);
                 CreateResource("Tree", new Vector3(x, 0f, z), PrimitiveType.Capsule, new Color(0.14f, 0.40f, 0.10f), 2.5f);
             }
-
             for (int i = 0; i < 4; i++)
             {
                 float x = Random.Range(-45f, 45f);
                 float z = Random.Range(-35f, 35f);
                 CreateResource("Gold Vein", new Vector3(x, 0f, z), PrimitiveType.Sphere, new Color(0.90f, 0.63f, 0.10f), 1.1f);
             }
-
             for (int i = 0; i < 3; i++)
                 CreateUnit("Villager", new Vector3(-3f + i * 2f, 0.7f, 4f), 0, Color.blue);
         }
@@ -92,7 +87,6 @@ namespace RealmWars3D
             root.transform.position = position;
             var building = root.AddComponent<TownCenter>();
             building.Initialize(owner == 0, 1000f);
-
             CreateCube(root.transform, "Foundation", new Vector3(12f, 0.6f, 12f), new Vector3(0f, 0.3f, 0f), new Color(0.46f, 0.42f, 0.34f));
             CreateCube(root.transform, "Hall", new Vector3(9f, 4.4f, 7f), new Vector3(0f, 2.6f, 0.4f), owner == 0 ? new Color(0.64f, 0.50f, 0.31f) : new Color(0.55f, 0.27f, 0.24f));
             CreateCube(root.transform, "Left Wing", new Vector3(2.2f, 3.5f, 6f), new Vector3(-4f, 2.0f, 0.7f), new Color(0.50f, 0.39f, 0.25f));
@@ -144,7 +138,8 @@ namespace RealmWars3D
 
         private static Material MakeMaterial(Color color)
         {
-            var material = new Material(Shader.Find("Standard"));
+            var shader = Shader.Find("Standard") ?? Shader.Find("Universal Render Pipeline/Lit");
+            var material = new Material(shader);
             material.color = color;
             material.enableInstancing = true;
             return material;
