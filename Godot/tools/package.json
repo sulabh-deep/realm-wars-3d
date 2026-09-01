@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "dependencies": {
+    "@gltf-transform/cli": "4.3.0"
+  }
+}
