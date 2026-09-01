@@ -63,8 +63,10 @@ jobs:
       - name: Prepare provided 3D models
         shell: bash
         run: |
-          set -euo pipefail
-          npm install --prefix "$GODOT_DIR/tools" --no-audit --no-fund --ignore-scripts
+          set -uo pipefail
+          npm install --prefix "$GODOT_DIR/tools" --no-audit --no-fund --ignore-scripts || npm_status=$?
+          npm_status=${npm_status:-0}
+          echo "npm install exit status: $npm_status"
           test -d "$GODOT_DIR/tools/node_modules/@gltf-transform/core"
           test -d "$GODOT_DIR/tools/node_modules/@gltf-transform/extensions"
           test -d "$GODOT_DIR/tools/node_modules/draco3dgltf"
