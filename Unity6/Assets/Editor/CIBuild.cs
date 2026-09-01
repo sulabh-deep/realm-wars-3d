@@ -12,34 +12,24 @@ namespace RealmWars3D.Editor
 
         public static void BuildWebGL()
         {
-            Build(BuildTarget.WebGL, Path.Combine("build", "WebGL"));
-        }
-
-        public static void BuildAndroid()
-        {
-            Build(BuildTarget.Android, Path.Combine("build", "Android", "RealmWars3D.apk"));
-        }
-
-        private static void Build(BuildTarget target, string location)
-        {
-            EnsureOutputDirectory(location);
             EnsureMainSceneInBuildSettings();
+            string location = Path.Combine("build", "WebGL");
+            Directory.CreateDirectory(location);
 
             var options = new BuildPlayerOptions
             {
                 scenes = new[] { MainScene },
                 locationPathName = location,
-                target = target,
+                target = BuildTarget.WebGL,
                 options = BuildOptions.CleanBuildCache
             };
 
-            Debug.Log($"Realm Wars CI: building {target} -> {location}");
+            Debug.Log($"Realm Wars CI: building WebGL -> {location}");
             BuildReport report = BuildPipeline.BuildPlayer(options);
-            BuildSummary summary = report.summary;
+            if (report.summary.result != BuildResult.Succeeded)
+                throw new BuildFailedException($"Realm Wars CI WebGL build failed: {report.summary.result}");
 
-            Debug.Log($"Realm Wars CI: result={summary.result}, size={summary.totalSize} bytes, time={summary.totalTime}");
-            if (summary.result != BuildResult.Succeeded)
-                throw new BuildFailedException($"Realm Wars CI build failed for {target}: {summary.result}");
+            Debug.Log($"Realm Wars CI: WebGL succeeded, size={report.summary.totalSize} bytes, time={report.summary.totalTime}");
         }
 
         private static void EnsureMainSceneInBuildSettings()
@@ -51,13 +41,6 @@ namespace RealmWars3D.Editor
             {
                 new EditorBuildSettingsScene(MainScene, true)
             };
-        }
-
-        private static void EnsureOutputDirectory(string outputPath)
-        {
-            string directory = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(directory))
-                Directory.CreateDirectory(directory);
         }
     }
 }
