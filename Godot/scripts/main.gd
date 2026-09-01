@@ -1,10 +1,10 @@
 extends Node3D
 
 const UNIT_DEFS := {
-    "villager": {"hp": 40.0, "damage": 3.0, "range": 0.0, "speed": 4.0, "food": 50, "wood": 0, "gold": 0, "color": Color(0.25, 0.55, 0.95)},
-    "militia": {"hp": 60.0, "damage": 8.0, "range": 0.0, "speed": 4.5, "food": 60, "wood": 0, "gold": 20, "color": Color(0.9, 0.25, 0.25)},
-    "archer": {"hp": 45.0, "damage": 6.0, "range": 8.0, "speed": 4.7, "food": 0, "wood": 30, "gold": 40, "color": Color(0.35, 0.85, 0.35)},
-    "knight": {"hp": 120.0, "damage": 14.0, "range": 0.0, "speed": 5.2, "food": 80, "wood": 0, "gold": 70, "color": Color(0.88, 0.65, 0.15)}
+    "villager": {"hp": 40.0, "damage": 3.0, "speed": 4.0, "food": 50, "wood": 0, "gold": 0, "color": Color(0.25, 0.55, 0.95)},
+    "militia": {"hp": 60.0, "damage": 8.0, "speed": 4.5, "food": 60, "wood": 0, "gold": 20, "color": Color(0.9, 0.25, 0.25)},
+    "archer": {"hp": 45.0, "damage": 6.0, "speed": 4.7, "food": 0, "wood": 30, "gold": 40, "color": Color(0.35, 0.85, 0.35)},
+    "knight": {"hp": 120.0, "damage": 14.0, "speed": 5.2, "food": 80, "wood": 0, "gold": 70, "color": Color(0.88, 0.65, 0.15)}
 }
 
 var wood := 250
@@ -12,7 +12,6 @@ var food := 250
 var gold := 150
 var population := 3
 var population_cap := 50
-
 var units: Array[Dictionary] = []
 var player_town: Node3D
 var enemy_town: Node3D
@@ -23,7 +22,6 @@ var yaw := 45.0
 var camera_distance := 30.0
 var camera_focus := Vector3.ZERO
 var dragging := false
-var last_mouse := Vector2.ZERO
 var ui_label: Label
 
 func _ready() -> void:
@@ -54,17 +52,19 @@ func _build_world() -> void:
     ground.mesh = plane
     ground.material_override = _material(Color(0.47, 0.64, 0.35))
     add_child(ground)
+
     var ground_body := StaticBody3D.new()
     var shape := CollisionShape3D.new()
     var box := BoxShape3D.new()
     box.size = Vector3(220, 0.2, 220)
     shape.shape = box
-    shape.position.y = -0.1
+    shape.position = Vector3(0, -0.1, 0)
     ground_body.add_child(shape)
     add_child(ground_body)
 
     camera = Camera3D.new()
     camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+    camera.current = true
     add_child(camera)
     _update_camera()
 
@@ -81,107 +81,131 @@ func _build_world() -> void:
     for i in 3:
         _spawn_unit("villager", Vector3(-3 + i * 2, 0.75, 4), true)
 
-func _make_town(name: String, pos: Vector3, player: bool) -> Node3D:
+func _make_town(name: String, pos: Vector3, is_player: bool) -> Node3D:
     var root := Node3D.new()
     root.name = name
     root.position = pos
     add_child(root)
+
     var base := _box(Vector3(12, 0.6, 12), Vector3(0, 0.3, 0), Color(0.46, 0.42, 0.34))
     root.add_child(base)
-    root.add_child(_box(Vector3(9, 4.4, 7), Vector3(0, 2.6, 0.4), player ? Color(0.64, 0.50, 0.31) : Color(0.55, 0.27, 0.24)))
-    root.add_child(_box(Vector3(11, 0.35, 9), Vector3(0, 5.1, 0.4), player ? Color(0.35, 0.19, 0.08) : Color(0.32, 0.08, 0.08)))
-    root.add_child(_box(Vector3(1.2, 2.0, 0.12), Vector3(0, 4.3, -3.65), player ? Color(0.10, 0.28, 0.72) : Color(0.72, 0.10, 0.10)))
-    var tower := MeshInstance3D.new()
-    var cyl := CylinderMesh.new()
-    cyl.top_radius = 0.7
-    cyl.bottom_radius = 0.7
-    cyl.height = 3.2
-    tower.mesh = cyl
-    tower.position = Vector3(0, 6.7, 0)
-    tower.material_override = _material(player ? Color(0.55, 0.38, 0.20) : Color(0.45, 0.20, 0.18))
-    root.add_child(tower)
+
+    var body_color := Color(0.64, 0.50, 0.31)
+    var roof_color := Color(0.35, 0.19, 0.08)
+    if not is_player:
+        body_color = Color(0.55, 0.27, 0.24)
+        roof_color = Color(0.32, 0.08, 0.08)
+
+    root.add_child(_box(Vector3(9, 4.4, 7), Vector3(0, 2.6, 0.4), body_color))
+    root.add_child(_box(Vector3(11, 0.35, 9), Vector3(0, 5.1, 0.4), roof_color))
+
+    var banner_color := Color(0.10, 0.28, 0.72)
+    if not is_player:
+        banner_color = Color(0.72, 0.10, 0.10)
+    root.add_child(_box(Vector3(1.2, 2.0, 0.12), Vector3(0, 4.3, -3.65), banner_color))
     return root
 
-func _make_resource(name: String, pos: Vector3, scale: float, color: Color) -> void:
+func _make_resource(name: String, pos: Vector3, size: float, color: Color) -> void:
     var node := MeshInstance3D.new()
     node.name = name
-    node.position = pos + Vector3.UP * (name == "Tree" ? scale * 0.7 : scale)
+    node.position = pos
     var mesh: Mesh
     if name == "Tree":
         var cyl := CylinderMesh.new()
-        cyl.top_radius = scale * 0.45
-        cyl.bottom_radius = scale * 0.55
-        cyl.height = scale * 1.8
+        cyl.top_radius = size * 0.45
+        cyl.bottom_radius = size * 0.55
+        cyl.height = size * 1.8
         mesh = cyl
+        node.position.y = size * 0.9
     else:
         var sphere := SphereMesh.new()
-        sphere.radius = scale
-        sphere.height = scale * 2.0
+        sphere.radius = size
+        sphere.height = size * 2.0
         mesh = sphere
+        node.position.y = size
     node.mesh = mesh
     node.material_override = _material(color)
     add_child(node)
 
-func _spawn_unit(kind: String, pos: Vector3, player: bool) -> void:
+func _spawn_unit(kind: String, pos: Vector3, is_player: bool) -> void:
     var def: Dictionary = UNIT_DEFS[kind]
     var body := CharacterBody3D.new()
-    body.name = def["name"] if def.has("name") else kind.capitalize()
+    body.name = kind.capitalize()
     body.position = pos
+    body.set_meta("kind", kind)
+    body.set_meta("player", is_player)
+    body.set_meta("hp", def["hp"])
+
     var mesh_node := MeshInstance3D.new()
     var sphere := SphereMesh.new()
     sphere.radius = 0.65
     sphere.height = 1.3
     mesh_node.mesh = sphere
-    mesh_node.material_override = _material(def["color"] if player else Color(0.78, 0.15, 0.15))
+    var unit_color: Color = def["color"]
+    if not is_player:
+        unit_color = Color(0.78, 0.15, 0.15)
+    mesh_node.material_override = _material(unit_color)
     body.add_child(mesh_node)
+
     var collision := CollisionShape3D.new()
-    var shape := CapsuleShape3D.new()
-    shape.radius = 0.55
-    shape.height = 1.2
-    collision.shape = shape
+    var capsule := CapsuleShape3D.new()
+    capsule.radius = 0.55
+    capsule.height = 1.2
+    collision.shape = capsule
     body.add_child(collision)
+
     add_child(body)
-    units.append({"node": body, "kind": kind, "player": player, "hp": def["hp"], "destination": body.position, "moving": false})
+    units.append({"node": body, "kind": kind, "player": is_player})
 
 func _build_ui() -> void:
     var canvas := CanvasLayer.new()
     add_child(canvas)
+
     var top := ColorRect.new()
-    top.position = Vector2(0, 0)
+    top.name = "TopBar"
     top.size = Vector2(1280, 48)
     top.color = Color(0.08, 0.06, 0.04, 0.92)
     canvas.add_child(top)
+
     ui_label = Label.new()
     ui_label.position = Vector2(16, 12)
     ui_label.add_theme_font_size_override("font_size", 18)
     canvas.add_child(ui_label)
+
     var panel := HBoxContainer.new()
+    panel.name = "TrainingBar"
     panel.position = Vector2(10, 650)
     panel.size = Vector2(1260, 60)
     canvas.add_child(panel)
+
     for kind in ["villager", "militia", "archer", "knight"]:
-        var b := Button.new()
-        var d: Dictionary = UNIT_DEFS[kind]
-        b.text = kind.capitalize() + " · " + _cost_text(d)
-        b.custom_minimum_size = Vector2(260, 52)
-        b.pressed.connect(func(): _train(kind))
-        panel.add_child(b)
+        var button := Button.new()
+        var def: Dictionary = UNIT_DEFS[kind]
+        button.text = kind.capitalize() + " · " + _cost_text(def)
+        button.custom_minimum_size = Vector2(260, 52)
+        button.pressed.connect(_train.bind(kind))
+        panel.add_child(button)
     _update_ui()
 
-func _cost_text(d: Dictionary) -> String:
+func _cost_text(def: Dictionary) -> String:
     var parts: Array[String] = []
-    if d["wood"] > 0: parts.append(str(d["wood"]) + "W")
-    if d["food"] > 0: parts.append(str(d["food"]) + "F")
-    if d["gold"] > 0: parts.append(str(d["gold"]) + "G")
+    if def["wood"] > 0:
+        parts.append(str(def["wood"]) + "W")
+    if def["food"] > 0:
+        parts.append(str(def["food"]) + "F")
+    if def["gold"] > 0:
+        parts.append(str(def["gold"]) + "G")
     return " ".join(parts)
 
 func _train(kind: String) -> void:
-    var d: Dictionary = UNIT_DEFS[kind]
-    if population >= population_cap: return
-    if wood < d["wood"] or food < d["food"] or gold < d["gold"]: return
-    wood -= d["wood"]
-    food -= d["food"]
-    gold -= d["gold"]
+    var def: Dictionary = UNIT_DEFS[kind]
+    if population >= population_cap:
+        return
+    if wood < def["wood"] or food < def["food"] or gold < def["gold"]:
+        return
+    wood -= def["wood"]
+    food -= def["food"]
+    gold -= def["gold"]
     population += 1
     _spawn_unit(kind, player_town.position + Vector3(6, 0.75, 5), true)
     _update_ui()
@@ -194,7 +218,6 @@ func _input(event: InputEvent) -> void:
     if event is InputEventMouseButton:
         if event.button_index == MOUSE_BUTTON_MIDDLE:
             dragging = event.pressed
-            last_mouse = event.position
         elif event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
             _select_at(event.position)
         elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
@@ -207,36 +230,39 @@ func _input(event: InputEvent) -> void:
             _update_camera()
     elif event is InputEventMouseMotion and dragging:
         yaw -= event.relative.x * 0.18
-        last_mouse = event.position
         _update_camera()
     elif event is InputEventScreenTouch and event.pressed:
         _select_at(event.position)
     elif event is InputEventScreenDrag:
-        pass
+        camera_focus += Vector3(-event.relative.x * 0.03, 0, -event.relative.y * 0.03)
+        _update_camera()
 
 func _select_at(screen_pos: Vector2) -> void:
-    if not camera: return
+    if camera == null:
+        return
     var from := camera.project_ray_origin(screen_pos)
-    var dir := camera.project_ray_normal(screen_pos)
-    var query := PhysicsRayQueryParameters3D.create(from, from + dir * 1000.0)
+    var direction := camera.project_ray_normal(screen_pos)
+    var query := PhysicsRayQueryParameters3D.create(from, from + direction * 1000.0)
     var hit := get_world_3d().direct_space_state.intersect_ray(query)
     if hit.is_empty():
         _clear_selection()
         return
     var collider: Node = hit["collider"]
-    for u in units:
-        if u["node"] == collider or collider.is_ancestor_of(u["node"]):
-            if u["player"]:
-                _set_selection(u["node"])
+    for unit_data in units:
+        var node: Node3D = unit_data["node"]
+        if collider == node or collider.is_ancestor_of(node):
+            if unit_data["player"]:
+                _set_selection(node)
                 return
     _clear_selection()
 
 func _move_selected(screen_pos: Vector2) -> void:
-    if selected_unit == null: return
+    if selected_unit == null:
+        return
     var from := camera.project_ray_origin(screen_pos)
-    var dir := camera.project_ray_normal(screen_pos)
-    var plane := Plane(Vector3.UP, 0.0)
-    var hit := plane.intersects_ray(from, dir)
+    var direction := camera.project_ray_normal(screen_pos)
+    var ground := Plane(Vector3.UP, 0.0)
+    var hit := ground.intersects_ray(from, direction)
     if hit != null:
         selected_unit.set_meta("destination", hit)
 
@@ -254,40 +280,30 @@ func _set_selection(node: Node3D) -> void:
     selected_unit.add_child(selected_ring)
 
 func _clear_selection() -> void:
-    if selected_ring:
+    if selected_ring != null:
         selected_ring.queue_free()
     selected_ring = null
     selected_unit = null
 
 func _process(delta: float) -> void:
-    for u in units:
-        var node: CharacterBody3D = u["node"]
-        if not is_instance_valid(node): continue
+    for unit_data in units:
+        var node: CharacterBody3D = unit_data["node"]
+        if not is_instance_valid(node):
+            continue
         if node.has_meta("destination"):
-            var dest: Vector3 = node.get_meta("destination")
-            node.velocity = node.position.direction_to(dest) * UNIT_DEFS[u["kind"]]["speed"]
-            node.velocity.y = 0
+            var destination: Vector3 = node.get_meta("destination")
+            var movement: Vector3 = node.global_position.direction_to(destination)
+            movement.y = 0
+            node.velocity = movement * UNIT_DEFS[unit_data["kind"]]["speed"]
             node.move_and_slide()
-            if node.position.distance_to(dest) < 0.15:
-                node.position = dest
+            if node.global_position.distance_to(destination) < 0.2:
+                node.global_position = destination
                 node.remove_meta("destination")
                 node.velocity = Vector3.ZERO
-    if get_viewport().size.x != 1280:
-        _layout_ui()
-
-func _layout_ui() -> void:
-    for child in get_children():
-        if child is CanvasLayer:
-            var boxes := child.get_children()
-            if boxes.size() >= 2:
-                boxes[0].size.x = get_viewport().size.x
-                boxes[1].position = Vector2(16, 12)
-                if boxes.size() >= 2 and boxes[2] is HBoxContainer:
-                    boxes[2].position = Vector2(10, get_viewport().size.y - 68)
-                    boxes[2].size.x = get_viewport().size.x - 20
 
 func _update_camera() -> void:
-    if not camera: return
+    if camera == null:
+        return
     var r := deg_to_rad(yaw)
     camera.position = camera_focus + Vector3(sin(r) * camera_distance, camera_distance * 0.72, cos(r) * camera_distance)
     camera.look_at(camera_focus, Vector3.UP)
@@ -303,7 +319,7 @@ func _box(size: Vector3, pos: Vector3, color: Color) -> MeshInstance3D:
     return node
 
 func _material(color: Color) -> StandardMaterial3D:
-    var m := StandardMaterial3D.new()
-    m.albedo_color = color
-    m.roughness = 0.82
-    return m
+    var material := StandardMaterial3D.new()
+    material.albedo_color = color
+    material.roughness = 0.82
+    return material
