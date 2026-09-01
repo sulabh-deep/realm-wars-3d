@@ -15,10 +15,20 @@ const io = new NodeIO()
   .registerDependencies({ 'draco3d.decoder': decoder });
 
 const document = await io.read(input);
-for (const extension of document.getRoot().listExtensionsUsed()) {
-  if (extension.extensionName === 'KHR_draco_mesh_compression') {
-    extension.dispose();
-  }
+
+const dracoExtension = document.getRoot().listExtensionsUsed().find(
+  (extension) => extension.extensionName === 'KHR_draco_mesh_compression'
+);
+
+if (dracoExtension) {
+  // Reading the source with a registered decoder materializes the Draco geometry
+  // into normal accessors. Disposing the extension removes the KHR_draco wrapper
+  // before the document is written back out as a standard GLB.
+  dracoExtension.dispose();
+  console.log(`Decoded Draco geometry in ${input}`);
+} else {
+  console.log(`No Draco compression found in ${input}; copying through glTF Transform.`);
 }
+
 await io.write(output, document);
-console.log(`Decompressed ${input} -> ${output}`);
+console.log(`Wrote ${output}`);
