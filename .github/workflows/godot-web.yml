@@ -52,34 +52,47 @@ jobs:
           mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
           curl -fL --retry 3 "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz" -o /tmp/templates.tpz
           unzip -q /tmp/templates.tpz -d /tmp/templates
-          find /tmp/templates -type f -name 'web_nothreads_release.zip' -o -name 'web_nothreads_debug.zip' | while read -r f; do cp "$f" "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"; done
+          find /tmp/templates -type f -name 'web_nothreads_release.zip' -exec cp {} "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/" \;
           test -f "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/web_nothreads_release.zip"
 
       - name: Import project
         shell: bash
         run: |
           set -euo pipefail
-          godot --headless --path "$GODOT_DIR" --editor --quit
+          mkdir -p "$GODOT_DIR/$OUTPUT_DIR"
+          godot --headless --path "$GODOT_DIR" --editor --quit 2>&1 | tee /tmp/godot-import.log
+          if grep -qE '^ERROR:' /tmp/godot-import.log; then
+            echo 'Godot reported import errors.'
+            exit 1
+          fi
 
       - name: Validate project
         shell: bash
         run: |
           set -euo pipefail
-          godot --headless --path "$GODOT_DIR" --check-only --quit
+          godot --headless --path "$GODOT_DIR" --check-only 2>&1 | tee /tmp/godot-check.log
+          if grep -qE 'SCRIPT ERROR:|Parse Error:|ERROR: Failed to load script' /tmp/godot-check.log; then
+            echo 'Godot project validation reported script errors.'
+            exit 1
+          fi
 
       - name: Export Web
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$OUTPUT_DIR"
-          godot --headless --path "$GODOT_DIR" --export-release Web "$OUTPUT_DIR/index.html"
-          test -s "$OUTPUT_DIR/index.html"
-          find "$OUTPUT_DIR" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort
+          mkdir -p "$GODOT_DIR/$OUTPUT_DIR"
+          godot --headless --path "$GODOT_DIR" --export-release Web "$OUTPUT_DIR/RealmWars3D.html" 2>&1 | tee /tmp/godot-export.log
+          if grep -qE 'ERROR:|SCRIPT ERROR:|Parse Error:' /tmp/godot-export.log; then
+            echo 'Godot export reported errors.'
+            exit 1
+          fi
+          test -s "$GODOT_DIR/$OUTPUT_DIR/RealmWars3D.html"
+          find "$GODOT_DIR/$OUTPUT_DIR" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort
 
       - name: Upload playable Web build
         uses: actions/upload-artifact@v4
         with:
           name: RealmWars3D-Web-${{ github.sha }}
-          path: build/web
+          path: Godot/build/web
           if-no-files-found: error
           retention-days: 14
