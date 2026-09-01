@@ -1,6 +1,8 @@
 import bpy
 from pathlib import Path
 from mathutils import Vector
+import sys
+import traceback
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / 'assets-src'
@@ -15,8 +17,11 @@ COLORS = {
 }
 
 def clear_scene():
+    # Do not remove materials here: mats is shared across all source imports.
+    # Removing them invalidates the Python Material references and causes
+    # "StructRNA of type Material has been removed" on the next asset.
     bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=False)
-    for datablocks in (bpy.data.meshes, bpy.data.materials, bpy.data.images, bpy.data.curves):
+    for datablocks in (bpy.data.meshes, bpy.data.images, bpy.data.curves):
         for block in list(datablocks):
             if block.users == 0: datablocks.remove(block)
 
@@ -98,10 +103,21 @@ def process(src_path, mats):
     bpy.ops.export_scene.gltf(filepath=str(dst), export_format='GLB', use_selection=False,
         export_apply=True, export_materials='EXPORT', export_image_format='AUTO',
         export_texcoords=True, export_normals=True)
+    if not dst.exists() or dst.stat().st_size == 0:
+        raise RuntimeError(f'GLB export did not produce a valid file: {dst}')
     print(f'Processed {src_path} -> {dst} ({category}, ratio={ratio})')
 
-if not SRC.exists(): raise RuntimeError(f'Missing source directory: {SRC}')
-sources = sorted(SRC.rglob('*.glb'))
-if not sources: raise RuntimeError(f'No GLB files found under {SRC}')
-mats = {k: make_material(k, c, 0.65 if k == 'gold' else 0.0, 0.48 if k == 'gold' else 0.82) for k,c in COLORS.items()}
-for src in sources: process(src, mats)
+def main():
+    if not SRC.exists(): raise RuntimeError(f'Missing source directory: {SRC}')
+    sources = sorted(SRC.rglob('*.glb'))
+    if not sources: raise RuntimeError(f'No GLB files found under {SRC}')
+    mats = {k: make_material(k, c, 0.65 if k == 'gold' else 0.0, 0.48 if k == 'gold' else 0.82) for k,c in COLORS.items()}
+    for src in sources: process(src, mats)
+    print(f'Successfully processed {len(sources)} GLB asset(s).')
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception:
+        traceback.print_exc()
+        sys.exit(1)
