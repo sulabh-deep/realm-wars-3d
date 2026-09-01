@@ -1,0 +1,65 @@
+name: Process 3D Assets
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'assets-src/**/*.glb'
+      - 'blender/**'
+      - '.github/workflows/blender-assets.yml'
+
+permissions:
+  contents: write
+
+env:
+  BLENDER_VERSION: '4.5.13'
+  BLENDER_DIR: '${{ github.workspace }}/.blender'
+
+jobs:
+  process-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://download.blender.org/release/Blender4.5/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          curl -fL --retry 3 "$url" -o /tmp/blender.tar.xz
+          mkdir -p "$BLENDER_DIR"
+          tar -xJf /tmp/blender.tar.xz -C "$BLENDER_DIR" --strip-components=1
+          "$BLENDER_DIR/blender" --version
+          echo "$BLENDER_DIR" >> "$GITHUB_PATH"
+
+      - name: Process GLB assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets
+          blender -b --python blender/process_assets.py
+
+          # Do not allow a green workflow when the processor produced nothing.
+          count=$(find assets -type f -name '*.glb' | wc -l)
+          if [ "$count" -eq 0 ]; then
+            echo "ERROR: Blender completed but produced no GLB assets."
+            exit 1
+          fi
+          echo "Verified $count processed GLB asset(s)."
+
+      - name: Commit processed assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets
+          if git diff --cached --quiet; then
+            echo 'No processed asset changes.'
+          else
+            git commit -m 'Process 3D assets with Blender'
+            git push
+          fi

@@ -1,0 +1,47 @@
+# Simple workflow for deploying static content to GitHub Pages
+name: Deploy static content to Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Harden Town Center runtime
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = "root.userData.building=b;paintMaterials(root,owner);scene.add(root);b.mesh=root;root.updateMatrixWorld(true);"
+          new = "root.userData.building=b;scene.add(root);b.mesh=root;root.updateMatrixWorld(true);try{paintMaterials(root,owner)}catch(paintErr){console.warn('Town Center faction tint skipped:',paintErr)}root.updateMatrixWorld(true);"
+          if old not in s:
+            raise SystemExit('Expected Town Center attach sequence not found; refusing deployment')
+          s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
