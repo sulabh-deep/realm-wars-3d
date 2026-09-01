@@ -60,13 +60,14 @@ jobs:
           find /tmp/templates -type f -name 'web_nothreads_release.zip' -exec cp {} "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/" \;
           test -f "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/web_nothreads_release.zip"
 
-      - name: Exclude incompatible compressed GLBs for Web CI
+      - name: Prepare provided 3D models
         shell: bash
         run: |
           set -euo pipefail
-          rm -f "$GODOT_DIR"/assets/town-center/*.glb
-          rm -f "$GODOT_DIR"/assets/resources/*.glb
-          echo 'Using procedural fallback visuals for the CI web build.'
+          test -f "$GODOT_DIR/assets/town-center/stage1.glb"
+          test -f "$GODOT_DIR/assets/resources/tree.glb"
+          test -f "$GODOT_DIR/assets/resources/gold-vein.glb"
+          echo 'Using the provided GLB models from the repository.'
 
       - name: Import project
         shell: bash
