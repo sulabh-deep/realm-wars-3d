@@ -1,4 +1,4 @@
-name: Unity 6 CI
+name: Unity 6 WebGL CI
 
 on:
   push:
@@ -22,7 +22,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: unity6-${{ github.workflow }}-${{ github.ref }}
+  group: unity6-webgl-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -70,55 +70,13 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  android:
-    name: Android APK playable build
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      - name: Cache Unity Library
-        uses: actions/cache@v4
-        with:
-          path: Unity6/Library
-          key: Unity6-Library-Android-${{ runner.os }}-${{ hashFiles('Unity6/Assets/**', 'Unity6/Packages/**', 'Unity6/ProjectSettings/**', 'assets/**') }}
-          restore-keys: |
-            Unity6-Library-Android-${{ runner.os }}-
-            Unity6-Library-
-
-      - name: Build Android APK
-        uses: game-ci/unity-builder@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          projectPath: ${{ env.PROJECT_PATH }}
-          unityVersion: ${{ env.UNITY_VERSION }}
-          targetPlatform: Android
-          buildMethod: RealmWars3D.Editor.CIBuild.BuildAndroid
-          versioning: None
-
-      - name: Upload Android APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: RealmWars3D-Android-${{ github.sha }}
-          path: build/Android/RealmWars3D.apk
-          if-no-files-found: error
-          retention-days: 14
-
   summary:
     name: CI summary
-    needs: [webgl, android]
+    needs: [webgl]
     runs-on: ubuntu-latest
     if: always()
     steps:
-      - name: Check build results
+      - name: Check build result
         run: |
           echo "WebGL: ${{ needs.webgl.result }}"
-          echo "Android: ${{ needs.android.result }}"
           test "${{ needs.webgl.result }}" = "success"
-          test "${{ needs.android.result }}" = "success"
