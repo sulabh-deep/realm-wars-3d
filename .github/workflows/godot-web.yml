@@ -5,11 +5,15 @@ on:
     branches: [godot-migration]
     paths:
       - 'Godot/**'
+      - 'assets-src/**'
+      - 'blender/**'
       - '.github/workflows/godot-web.yml'
   pull_request:
     branches: [godot-migration]
     paths:
       - 'Godot/**'
+      - 'assets-src/**'
+      - 'blender/**'
       - '.github/workflows/godot-web.yml'
   workflow_dispatch:
 
@@ -22,6 +26,7 @@ concurrency:
 
 env:
   GODOT_VERSION: '4.5.2'
+  BLENDER_VERSION: '4.5.13'
   GODOT_DIR: Godot
   OUTPUT_DIR: build/web
 
@@ -29,7 +34,7 @@ jobs:
   build-web:
     name: Playable Web build
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,6 +59,28 @@ jobs:
           unzip -q /tmp/templates.tpz -d /tmp/templates
           find /tmp/templates -type f -name 'web_nothreads_release.zip' -exec cp {} "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/" \;
           test -f "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/web_nothreads_release.zip"
+
+      - name: Install Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://download.blender.org/release/Blender4.5/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          curl -fL --retry 3 "$url" -o /tmp/blender.tar.xz
+          mkdir -p /tmp/blender
+          tar -xJf /tmp/blender.tar.xz -C /tmp/blender --strip-components=1
+          install -m 0755 /tmp/blender/blender /usr/local/bin/blender
+          blender --version
+
+      - name: Rebuild Godot-compatible GLBs
+        shell: bash
+        run: |
+          set -euo pipefail
+          blender -b --python blender/process_assets.py 2>&1 | tee /tmp/blender-assets.log
+          mkdir -p "$GODOT_DIR/assets"
+          cp -R assets/. "$GODOT_DIR/assets/"
+          test -s "$GODOT_DIR/assets/town-center/stage1.glb"
+          test -s "$GODOT_DIR/assets/resources/tree.glb"
+          test -s "$GODOT_DIR/assets/resources/gold-vein.glb"
 
       - name: Import project
         shell: bash
