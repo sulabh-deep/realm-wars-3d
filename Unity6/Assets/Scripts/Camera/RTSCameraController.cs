@@ -17,7 +17,6 @@ namespace RealmWars3D
         private void Update()
         {
             if (cam == null) return;
-
             HandlePointer();
             HandleZoom();
             UpdateTransform();
@@ -27,25 +26,20 @@ namespace RealmWars3D
         {
             var mouse = Mouse.current;
             if (mouse == null) return;
-
-            if (mouse.leftButton.wasPressedThisFrame)
+            if (mouse.rightButton.wasPressedThisFrame)
             {
                 dragging = true;
                 lastPointer = mouse.position.ReadValue();
             }
-
-            if (mouse.leftButton.wasReleasedThisFrame)
+            if (mouse.rightButton.wasReleasedThisFrame)
                 dragging = false;
-
-            if (dragging)
+            if (!dragging) return;
+            var current = mouse.position.ReadValue();
+            var delta = current - lastPointer;
+            if (delta.sqrMagnitude > 0.01f)
             {
-                var current = mouse.position.ReadValue();
-                var delta = current - lastPointer;
-                if (delta.sqrMagnitude > 0.01f)
-                {
-                    yaw -= delta.x * 0.18f;
-                    lastPointer = current;
-                }
+                yaw -= delta.x * 0.18f;
+                lastPointer = current;
             }
         }
 
@@ -57,7 +51,6 @@ namespace RealmWars3D
 
             var touchscreen = Touchscreen.current;
             if (touchscreen == null || touchscreen.touches.Count < 2) return;
-
             var a = touchscreen.touches[0].position.ReadValue();
             var b = touchscreen.touches[1].position.ReadValue();
             var oldA = a - touchscreen.touches[0].delta.ReadValue();
