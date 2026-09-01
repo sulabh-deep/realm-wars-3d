@@ -89,11 +89,9 @@ def build_initial_town_center(materials):
     accent = materials['accent']
     gold = materials['gold']
 
-    # 12 x 12 gameplay footprint, low object/triangle count.
     add_box('Foundation', (0, 0.30, 0), (12.0, 0.60, 12.0), stone, 0.10)
     add_box('Floor', (0, 0.66, 0), (10.8, 0.18, 10.8), wall, 0.03)
 
-    # Four timber posts and low plaster rear wall.
     for x in (-4.6, 4.6):
         for z in (-4.1, 4.1):
             add_box('TimberPost', (x, 3.0, z), (0.65, 5.8, 0.65), wood, 0.05)
@@ -101,34 +99,29 @@ def build_initial_town_center(materials):
     add_box('LeftWall', (-4.35, 3.0, 0), (0.45, 4.7, 7.8), wall, 0.04)
     add_box('RightWall', (4.35, 3.0, 0), (0.45, 4.7, 7.8), wall, 0.04)
 
-    # Simple gabled roof with two sloped planes.
     for side in (-1, 1):
         roof_panel = add_box('ThatchRoof', (0, 6.0, side * 1.95), (10.8, 0.28, 5.1), roof, 0.03)
         roof_panel.rotation_euler.x = math.radians(side * -31)
     add_box('RidgeBeam', (0, 7.45, 0), (11.1, 0.38, 0.42), wood, 0.03)
 
-    # Ridge bell tower.
     for x in (-1.0, 1.0):
         add_box('BellTowerPost', (x, 8.5, 0), (0.30, 2.0, 0.30), wood, 0.02)
     for z in (-0.9, 0.9):
         add_box('BellTowerBeam', (0, 8.0, z), (2.35, 0.28, 0.28), wood, 0.02)
     add_cone('BellRoof', (0, 9.85, 0), 1.55, 0.15, 1.65, roof, 4)
-    bell = add_cylinder('Bell', (0, 8.35, 0), 0.48, 0.70, gold, 16)
+    add_cylinder('Bell', (0, 8.35, 0), 0.48, 0.70, gold, 16)
 
-    # Central firepit.
     for i in range(10):
         a = i * math.tau / 10
         add_cylinder('FirepitStone', (math.cos(a) * 1.0, 0.95, math.sin(a) * 1.0), 0.28, 0.45, stone, 8)
     add_cylinder('Firepit', (0, 1.13, 0), 0.67, 0.08, wood, 12)
 
-    # Initial faction banner and small flag. These materials are named for runtime tinting.
     add_box('FactionBanner', (0, 4.8, -4.62), (1.05, 1.85, 0.08), accent, 0.02)
     add_box('FactionBannerTrim', (0, 5.72, -4.67), (1.16, 0.10, 0.10), gold, 0.01)
     add_cylinder('FactionMedallion', (0, 4.85, -4.70), 0.18, 0.08, gold, 12)
     add_cylinder('FlagPole', (0, 9.65, 0), 0.06, 2.8, wood, 8)
     add_box('FactionFlag', (0.42, 10.55, 0), (0.80, 0.42, 0.06), accent, 0.01)
 
-    # Apply and export-ready transforms.
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
     bpy.ops.object.select_all(action='DESELECT')
@@ -145,8 +138,8 @@ def export_glb(dst):
         export_image_format='AUTO',
         export_texcoords=False,
         export_normals=True,
-        export_draco_mesh_compression_enable=True,
-        export_draco_mesh_compression_level=6,
+        # Godot's built-in glTF importer does not decode Draco in this CI setup.
+        export_draco_mesh_compression_enable=False,
     )
     if not dst.exists() or dst.stat().st_size == 0:
         raise RuntimeError(f'Invalid GLB export: {dst}')
@@ -192,7 +185,7 @@ def main():
         if src.exists():
             process_resource(src, materials, kind)
             export_glb(OUT / 'resources' / f'{kind}.glb')
-    print('Successfully processed requested 3D assets.')
+    print('Successfully processed requested 3D assets without Draco compression.')
 
 
 if __name__ == '__main__':
