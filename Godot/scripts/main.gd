@@ -243,7 +243,7 @@ func _select_at(screen_pos: Vector2) -> void:
     var from := camera.project_ray_origin(screen_pos)
     var direction := camera.project_ray_normal(screen_pos)
     var query := PhysicsRayQueryParameters3D.create(from, from + direction * 1000.0)
-    var hit := get_world_3d().direct_space_state.intersect_ray(query)
+    var hit: Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
     if hit.is_empty():
         _clear_selection()
         return
@@ -262,7 +262,7 @@ func _move_selected(screen_pos: Vector2) -> void:
     var from := camera.project_ray_origin(screen_pos)
     var direction := camera.project_ray_normal(screen_pos)
     var ground := Plane(Vector3.UP, 0.0)
-    var hit := ground.intersects_ray(from, direction)
+    var hit: Variant = ground.intersects_ray(from, direction)
     if hit != null:
         selected_unit.set_meta("destination", hit)
 
@@ -285,7 +285,7 @@ func _clear_selection() -> void:
     selected_ring = null
     selected_unit = null
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
     for unit_data in units:
         var node: CharacterBody3D = unit_data["node"]
         if not is_instance_valid(node):
