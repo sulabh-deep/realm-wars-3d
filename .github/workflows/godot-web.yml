@@ -6,13 +6,11 @@ on:
     paths:
       - 'Godot/**'
       - '.github/workflows/godot-web.yml'
-      - '.github/workflows/deploy-pages.yml'
   pull_request:
     branches: [godot-migration]
     paths:
       - 'Godot/**'
       - '.github/workflows/godot-web.yml'
-      - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -34,6 +32,9 @@ jobs:
     name: Build and deploy Web
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
