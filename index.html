@@ -2,14 +2,37 @@
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Realm Wars 3D</title><style>html,body{margin:0;height:100%;overflow:hidden;background:#111}canvas{display:block}</style></head><body><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script><script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script><script>
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x83c9e8);scene.fog=new THREE.Fog(0x83c9e8,60,220);
 const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.1,500);camera.position.set(22,18,22);camera.lookAt(0,3,0);
-const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;document.body.appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xd8efff,0x4c5b35,1.1));const sun=new THREE.DirectionalLight(0xffffff,1.25);sun.position.set(-30,60,20);sun.castShadow=true;scene.add(sun);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.outputEncoding=THREE.sRGBEncoding;document.body.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xd8efff,0x4c5b35,1.25));const sun=new THREE.DirectionalLight(0xffffff,1.35);sun.position.set(-30,60,20);sun.castShadow=true;scene.add(sun);
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(180,180),new THREE.MeshLambertMaterial({color:0x4f843e}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 const loader=new THREE.GLTFLoader();const status=document.createElement('div');status.style='position:fixed;top:12px;left:12px;padding:8px 12px;background:rgba(0,0,0,.72);color:#ffd66b;font:13px monospace;z-index:3';status.textContent='Loading Town Center GLB…';document.body.appendChild(status);
-loader.load('assets/town-center/stage1.glb',g=>{const m=g.scene||g.scenes[0];const box=new THREE.Box3().setFromObject(m);const size=box.getSize(new THREE.Vector3());const center=box.getCenter(new THREE.Vector3());const scale=12/Math.max(size.x,size.z,.001);m.scale.setScalar(scale);
-// Position AFTER scaling. This is critical: otherwise the scaled mesh is pushed below the ground.
-m.position.set(-center.x*scale,-box.min.y*scale,-center.z*scale);
-m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.frustumCulled=false;}});scene.add(m);
-const scaledSize=size.clone().multiplyScalar(scale);camera.position.set(scaledSize.x*1.35,Math.max(12,scaledSize.y*1.15),scaledSize.z*1.35);camera.lookAt(0,scaledSize.y*.38,0);status.textContent='Town Center GLB loaded';setTimeout(()=>status.remove(),1800)},undefined,e=>{status.textContent='GLB load failed: '+(e.message||'check assets path');console.error(e)});
+loader.load('assets/town-center/stage1.glb',g=>{
+  const m=g.scene||g.scenes[0];
+  // Normalize the complete imported hierarchy, including nested node transforms.
+  m.scale.set(1,1,1);m.position.set(0,0,0);m.rotation.set(0,0,0);m.updateMatrixWorld(true);
+  let box=new THREE.Box3().setFromObject(m);let size=box.getSize(new THREE.Vector3());
+  const scale=12/Math.max(size.x,size.z,.001);
+  m.scale.setScalar(scale);m.updateMatrixWorld(true);
+  // Recalculate bounds AFTER scale, then put the actual lowest point on the ground.
+  box=new THREE.Box3().setFromObject(m);const center=box.getCenter(new THREE.Vector3());size=box.getSize(new THREE.Vector3());
+  m.position.x-=center.x;m.position.y-=box.min.y;m.position.z-=center.z;m.updateMatrixWorld(true);
+
+  let meshCount=0;
+  m.traverse(o=>{
+    if(!o.isMesh)return;
+    meshCount++;o.visible=true;o.castShadow=true;o.receiveShadow=true;o.frustumCulled=false;
+    // Force every submesh to an opaque, double-sided material. The supplied GLB is
+    // geometry-heavy and some source material flags can otherwise hide surfaces.
+    o.material=new THREE.MeshStandardMaterial({color:0xd5a55f,roughness:.82,metalness:.02,side:THREE.DoubleSide,transparent:false,opacity:1,depthWrite:true,depthTest:true});
+  });
+  scene.add(m);
+
+  // Final bounds after normalization; frame the whole building, not its original origin.
+  box=new THREE.Box3().setFromObject(m);size=box.getSize(new THREE.Vector3());
+  const radius=Math.max(size.x,size.z,1);const height=Math.max(size.y,1);
+  camera.position.set(radius*1.55,height*1.05,radius*1.55);camera.lookAt(0,height*.45,0);
+  status.textContent='Town Center loaded — '+meshCount+' meshes';setTimeout(()=>status.remove(),2200);
+  console.log('Town Center normalized bounds:',size,'meshes:',meshCount);
+},undefined,e=>{status.textContent='GLB load failed: '+(e.message||'check assets path');console.error(e)});
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});function a(){requestAnimationFrame(a);renderer.render(scene,camera)}a();
 </script></body></html>
