@@ -18,6 +18,9 @@ permissions:
   pages: write
   id-token: write
 
+authorization:
+  contents: read
+
 concurrency:
   group: godot-web-${{ github.ref }}
   cancel-in-progress: true
@@ -63,13 +66,9 @@ jobs:
       - name: Prepare provided 3D models
         shell: bash
         run: |
-          set -uo pipefail
-          npm install --prefix "$GODOT_DIR/tools" --no-audit --no-fund --ignore-scripts || npm_status=$?
-          npm_status=${npm_status:-0}
-          echo "npm install exit status: $npm_status"
-          test -d "$GODOT_DIR/tools/node_modules/@gltf-transform/core"
-          test -d "$GODOT_DIR/tools/node_modules/@gltf-transform/extensions"
-          test -d "$GODOT_DIR/tools/node_modules/draco3dgltf"
+          set -euo pipefail
+          npm install --prefix "$GODOT_DIR/tools" --no-audit --no-fund --ignore-scripts
+          echo 'Installed model conversion dependencies.'
           mkdir -p /tmp/realm-wars-models
           for spec in \
             "town-center/stage1.glb" \
@@ -78,6 +77,7 @@ jobs:
             input="$GODOT_DIR/assets/$spec"
             output="/tmp/realm-wars-models/$(basename "$spec")"
             test -s "$input"
+            echo "Converting $input"
             timeout 120 node "$GODOT_DIR/tools/decompress-glb.mjs" "$input" "$output"
             test -s "$output"
           done
