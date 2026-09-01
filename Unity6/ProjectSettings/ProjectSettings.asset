@@ -1,0 +1,357 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+PlayerSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 26
+  productGUID: 9b8e3db3d2be4e6f9e51f2e2f8ec9abc
+  AndroidProfiler: 0
+  AndroidFilterTouchesWhenObscured: 0
+  AndroidEnableSustainedPerformanceMode: 0
+  defaultScreenOrientation: 1
+  targetDevice: 2
+  useOnDemandResources: 0
+  accelerometerFrequency: 60
+  companyName: Realm Wars
+  productName: Realm Wars 3D
+  defaultCursor: {fileID: 0}
+  cursorHotspot: {x: 0, y: 0}
+  m_SplashScreenBackgroundColor: {r: 0.47, g: 0.78, b: 0.90, a: 1}
+  m_ShowUnitySplashScreen: 0
+  m_ShowUnitySplashLogo: 1
+  m_SplashScreenOverlayOpacity: 1
+  m_SplashScreenAnimation: 1
+  m_SplashScreenLogoStyle: 1
+  m_SplashScreenDrawMode: 0
+  m_SplashScreenBackgroundAnimationZoom: 1
+  m_SplashScreenLogoAnimationZoom: 1
+  m_SplashScreenBackgroundLandscapeAspect: 1
+  m_SplashScreenBackgroundPortraitAspect: 1
+  m_SplashScreenBackgroundLandscapeUvs: {x: 0, y: 0, width: 1, height: 1}
+  m_SplashScreenBackgroundPortraitUvs: {x: 0, y: 0, width: 1, height: 1}
+  m_SplashScreenLogos: []
+  m_VirtualRealitySplashScreen: {fileID: 0}
+  m_HolographicTrackingLossScreen: {fileID: 0}
+  defaultScreenWidth: 1920
+  defaultScreenHeight: 1080
+  defaultScreenWidthWeb: 960
+  defaultScreenHeightWeb: 600
+  m_StereoRenderingPath: 0
+  m_ActiveColorSpace: 0
+  unsupportedMSAAFallback: 0
+  m_ActiveQualityLevel: 2
+  m_SpriteBatchVertexThreshold: 300
+  m_MTRendering: 1
+  mipStripping: 0
+  numberOfMipsStripped: 0
+  numberOfMipsStrippedPerMipmapLimitGroup: {}
+  m_StackTraceTypes: 01000000010000000100000001
+  iosShowActivityIndicatorOnLoading: -1
+  androidShowActivityIndicatorOnLoading: -1
+  androidGamepadSupportLevel: 0
+  chromeosInput: 0
+  AndroidMinSdkVersion: 23
+  AndroidTargetSdkVersion: 35
+  AndroidPreferredInstallLocation: 1
+  aotOptions: nimt-trampolines=1024
+  bundleVersion: 0.1.0
+  metroPackageVersion: 1.0
+  metroPackageName: Realm Wars 3D
+  metroPackageDescription: Realm Wars 3D
+  switchNMETAOverride: 
+  switchNNID: 
+  switchN3DSId: 
+  switchN3DSTitle: Realm Wars 3D
+  switchN3DSDescription: Realm Wars 3D
+  switchN3DSDeveloper: Realm Wars
+  switchN3DSRawProductImage: {fileID: 0}
+  switchN3DSUseExtSaveData: 0
+  switchN3DSRatingAge: 12
+  switchN3DSRatingParentalControl: 0
+  switchN3DSRatingCategories: 0
+  switchN3DSManualRatings: 0
+  switchN3DSManualRatings2: 0
+  switchN3DSRatingAge: 12
+  switchN3DSRegion: 0
+  switchN3DSCategory: 0
+  switchN3DSApplicationId: 0x01004D610FF00000
+  switchN3DSDisableLcdStretching: 0
+  switchN3DSDisableEs2Msaa: 0
+  switchN3DSCompressFileSystem: 1
+  switchN3DSLaunchScreen: {fileID: 0}
+  switchN3DSLaunchScreenWide: 0
+  switchN3DSBundleVersion: 0
+  switchN3DSApplicationIdList: []
+  switchN3DSApplicationIdSeed: 0
+  switchN3DSApplicationIdSeeds: []
+  switchNVNShaderPoolsGranularity: 33554432
+  switchNVNDefaultPoolsGranularity: 16777216
+  switchNVNOtherPoolsGranularity: 16777216
+  switchNVNMaxPublicTextureIDCount: 0
+  switchNVNMaxPublicSamplerIDCount: 0
+  switchNVNMaxPublicShaderIDCount: 0
+  switchNVNMaxPublicLUTIDCount: 0
+  switchNVNShaderPoolsGranularity: 33554432
+  switchNVNDefaultPoolsGranularity: 16777216
+  switchNVNOtherPoolsGranularity: 16777216
+  switchNVNMaxPublicTextureIDCount: 0
+  switchNVNMaxPublicSamplerIDCount: 0
+  switchNVNMaxPublicSamplerIDCount: 0
+  m_BuildTargetIcons: []
+  m_BuildTargetPlatformIcons: []
+  m_BuildTargetBatching: []
+  m_BuildTargetGraphicsJobs: []
+  m_BuildTargetGraphicsJobsMode: []
+  m_BuildTargetGroupHardwareTrackers: []
+  m_AlwaysIncludedShaders: []
+  m_PreloadedAssets: []
+  metroInputSource: 0
+  wsaTransparentSwapchain: 0
+  m_HolographicPauseOnTrackingLoss: 1
+  xboxOneDisableKinectGpuReservation: 1
+  xboxOneEnable7thCore: 1
+  vrSettings: []
+  isWsaHolographicRemotingEnabled: 0
+  enableInternalProfiler: 0
+  allowHDRDisplaySupport: 0
+  useHDRDisplay: 0
+  hdrBitDepth: 0
+  m_ColorGamuts: 00000000
+  targetPixelDensity: 30
+  resolutionScalingMode: 0
+  resetResolutionOnWindowResize: 0
+  androidResizableWindow: 0
+  androidDefaultWindowWidth: 1920
+  androidDefaultWindowHeight: 1080
+  androidMinimumWindowWidth: 400
+  androidMinimumWindowHeight: 300
+  androidFullscreenMode: 1
+  defaultIsNativeResolution: 1
+  macRetinaSupport: 1
+  runInBackground: 1
+  captureSingleScreen: 0
+  muteOtherAudioSources: 0
+  submitAnalytics: 1
+  usePlayerLog: 1
+  dedicatedServerOptimizations: 0
+  xboxOneResolution: 0
+  xboxOneSResolution: 0
+  xboxOneXResolution: 3
+  xboxOneMonoLoggingLevel: 0
+  xboxOneLoggingLevel: 1
+  xboxOneDisableEsram: 0
+  xboxOneEnableTypeOptimization: 0
+  xboxOnePresentImmediateThreshold: 0
+  switchQueueCommandMemory: 1048576
+  switchQueueControlMemory: 16384
+  switchQueueComputeMemory: 262144
+  switchNVNCommandMemory: 1048576
+  switchNVNControlMemory: 16384
+  switchNVNComputeMemory: 262144
+  switchNVNNVNDefaultPoolsGranularity: 16777216
+  switchNVNMaxPublicTextureIDCount: 0
+  switchNVNMaxPublicSamplerIDCount: 0
+  switchNVNMaxPublicShaderIDCount: 0
+  switchNVNMaxPublicLUTIDCount: 0
+  switchNVNMaxPublicTextureIDCount: 0
+  switchNVNMaxPublicSamplerIDCount: 0
+  switchNVNMaxPublicShaderIDCount: 0
+  switchNVNMaxPublicLUTIDCount: 0
+  switchNVNMaxPublicSamplerIDCount: 0
+  switchNVNMaxPublicTextureIDCount: 0
+  switchNVNMaxPublicShaderIDCount: 0
+  switchNVNMaxPublicLUTIDCount: 0
+  switchNVNDisableSharedMemory: 0
+  stadiaPresentMode: 0
+  stadiaTargetFramerate: 0
+  vulkanNumSwapchainBuffers: 3
+  vulkanEnableSetSRGBWrite: 0
+  vulkanEnablePreTransform: 0
+  vulkanEnableLateAcquireNextImage: 0
+  vulkanEnableCommandBufferRecycling: 1
+  loadStoreDebugModeEnabled: 0
+  bundleVersion: 0.1.0
+  metroPackageVersion: 1.0
+  facebookSdkVersion: 0
+  webGLInitialMemorySize: 32
+  webGLMaximumMemorySize: 2048
+  webGLMemoryGrowthMode: 2
+  webGLMemoryLinearGrowthStep: 16
+  webGLMemoryGeometricGrowthStep: 0.2
+  webGLMemoryGeometricGrowthCap: 96
+  webGLPowerPreference: 2
+  scriptingDefineSymbols: {}
+  additionalCompilerArguments: {}
+  platformArchitecture: {}
+  scriptingBackend: {}
+  il2cppCompilerConfiguration: {}
+  il2cppCodeGeneration: {}
+  managedStrippingLevel: {}
+  incrementalIl2cppBuild: {}
+  suppressCommonWarnings: 1
+  allowUnsafeCode: 0
+  useDeterministicCompilation: 1
+  additionalIl2CppArgs: 
+  scriptingRuntimeVersion: 1
+  gcIncremental: 1
+  apiCompatibilityLevelPerPlatform: {}
+  m_RenderingPath: 1
+  mobileMTRendering: 1
+  metroPackageVersion: 1.0
+  xboxOneSResolution: 0
+  xboxOneXResolution: 3
+  xboxOneEnableTypeOptimization: 0
+  xboxOnePresentImmediateThreshold: 0
+  switchQueueCommandMemory: 1048576
+  switchQueueControlMemory: 16384
+  switchQueueComputeMemory: 262144
+  switchNVNCommandMemory: 1048576
+  switchNVNControlMemory: 16384
+  switchNVNComputeMemory: 262144
+  switchNVNAnalysisReservedMemory: 16777216
+  switchNVNMaxPublicTextureIDCount: 0
+  switchNVNMaxPublicSamplerIDCount: 0
+  switchNVNMaxPublicShaderIDCount: 0
+  switchNVNMaxPublicLUTIDCount: 0
+  switchNVNMaxPublicTextureIDCount: 0
+  switchNVNMaxPublicSamplerIDCount: 0
+  switchNVNMaxPublicShaderIDCount: 0
+  switchNVNMaxPublicLUTIDCount: 0
+  switchNVNDisableSharedMemory: 0
+  switchNVNEnableFileSystemTrace: 0
+  switchNVNAllowedNvnValues: []
+  switchNVNMaxZibSize: 0
+  switchNVNMaxLogFileSize: 8
+  switchNVNLogServerPort: 0
+  switchNVNLoggingLevel: 0
+  switchEnableFileSystemTrace: 0
+  ps4NPAgeRating: 12
+  ps4NPTitleID: 0
+  ps4NPTrophyPackPath: 
+  ps4NPCommsID: 
+  ps4NPCommunicationSignaling: 0
+  ps4NPScoreboardLogLevel: 0
+  ps4NPGameIntentId: 0
+  ps4NPTrophyCommId: 0
+  ps4NPTrophyUnlockDataPath: 
+  ps4NPAddressSanitization: 0
+  ps4NPSharedMemory: 0
+  ps4NPMaxDiscRequests: 64
+  ps4NPStreamingInstallResources: 0
+  ps4NPMaxDiscFileHandles: 1024
+  ps4NPEnable_FileSystemWarning: 0
+  ps4NPAllowSdkVersion: 0
+  ps4NPTitleID: 0
+  ps5NPAgeRating: 12
+  ps5NPTitleID: 0
+  ps5NPCommunicationId: 
+  ps5NPTrophyPackPath: 
+  ps5NPTitleSecret: 
+  ps5NPProductMetadataPath: 
+  ps5NPSaveDataVersion: 0
+  ps5NPReserveMemory: 184
+  ps5NPMaxMasterProfileCount: 4
+  ps5NPBootBehavior: 0
+  ps5NPAdaptiveVsyncCount: 0
+  ps5NP2DSRMode: 0
+  ps5NP2DSRThreshold: 0
+  ps5NP2DSRRepresentation: 0
+  ps5NP2DSRFeatureEnable: 0
+  ps5NPMaxPlayerCount: 4
+  ps5NPSubsystemPriority: 0
+  ps5NP2DSRMode: 0
+  ps5NP2DSRThreshold: 0
+  ps5NP2DSRRepresentation: 0
+  ps5NP2DSRFeatureEnable: 0
+  ps5NPMaxPlayerCount: 4
+  stadiaPresentMode: 0
+  stadiaTargetFramerate: 0
+  vulkanNumSwapchainBuffers: 3
+  vulkanEnableSetSRGBWrite: 0
+  vulkanEnablePreTransform: 0
+  vulkanEnableLateAcquireNextImage: 0
+  vulkanEnableCommandBufferRecycling: 1
+  xboxOneDisableEsram: 0
+  xboxOneEnable7thCore: 1
+  xboxOneEnableTypeOptimization: 0
+  xboxOnePresentImmediateThreshold: 0
+  xboxOneEnable7thCore: 1
+  xboxOneResolution: 0
+  xboxOneSResolution: 0
+  xboxOneXResolution: 3
+  xboxOneMonoLoggingLevel: 0
+  xboxOneLoggingLevel: 1
+  xboxOneDisableEsram: 0
+  xboxOneEnableTypeOptimization: 0
+  xboxOnePresentImmediateThreshold: 0
+  switchQueueCommandMemory: 1048576
+  switchQueueControlMemory: 16384
+  switchQueueComputeMemory: 262144
+  switchNvNDefaultPoolsGranularity: 16777216
+  switchNvNOtherPoolsGranularity: 16777216
+  switchMaxWorkerMultiple: 8
+  switchFileSystemTrace: 0
+  switchAddressSanitizer: 0
+  switchNvnShaderPoolsGranularity: 33554432
+  switchNvnMaxPublicTextureIDCount: 0
+  switchNvnMaxPublicSamplerIDCount: 0
+  switchNvnMaxPublicShaderIDCount: 0
+  switchNvnMaxPublicLUTIDCount: 0
+  switchHeapCommandMemory: 1048576
+  switchHeapControlMemory: 16384
+  switchHeapComputeMemory: 262144
+  switchHeapMainMemory: 16777216
+  switchHeapMemoryPoolGranularity: 16777216
+  switchNVNMaxPublicTextureIDCount: 0
+  switchNVNMaxPublicSamplerIDCount: 0
+  switchNVNMaxPublicShaderIDCount: 0
+  switchNVNMaxPublicLUTIDCount: 0
+  switchNVNMaxWorkerMultiple: 8
+  switchFileSystemTrace: 0
+  switchUseUnsafeHeaders: 0
+  switchEnableMemoryTrace: 0
+  switchEnableFileSystemTrace: 0
+  switchEnableProfiler: 0
+  switchEnableCrashHandler: 1
+  switchUseHotReload: 0
+  switchUseHttpServer: 0
+  switchEnableGpuDebuginfo: 0
+  switchTargetPlatform: 0
+  switchCompilerFormat: 0
+  switchMaxResidentGpuSize: 512
+  switchMaxWorkerMultiple: 8
+  switchNVNMaxWorkerMultiple: 8
+  switchNVNMaxPublicTextureIDCount: 0
+  switchNVNMaxPublicSamplerIDCount: 0
+  switchNVNMaxPublicShaderIDCount: 0
+  switchNVNMaxPublicLUTIDCount: 0
+  switchNMETAOverride: 
+  switchNNID: 
+  switchN3DSId: 
+  switchN3DSTitle: Realm Wars 3D
+  switchN3DSDescription: Realm Wars 3D
+  switchN3DSDeveloper: Realm Wars
+  switchN3DSRawProductImage: {fileID: 0}
+  switchN3DSUseExtSaveData: 0
+  switchN3DSRatingAge: 12
+  switchN3DSRatingParentalControl: 0
+  switchN3DSRatingCategories: 0
+  switchN3DSManualRatings: 0
+  switchN3DSManualRatings2: 0
+  switchN3DSRegion: 0
+  switchN3DSCategory: 0
+  switchN3DSApplicationId: 0x01004D610FF00000
+  switchN3DSDisableLcdStretching: 0
+  switchN3DSDisableEs2Msaa: 0
+  switchN3DSCompressFileSystem: 1
+  switchN3DSLaunchScreen: {fileID: 0}
+  switchN3DSLaunchScreenWide: 0
+  switchN3DSBundleVersion: 0
+  switchN3DSApplicationIdList: []
+  switchN3DSApplicationIdSeed: 0
+  switchN3DSApplicationIdSeeds: []
+  switchN3DSUseExtSaveData: 0
+  switchN3DSUseStereoscopic3D: 0
+  switchN3DSUsePortrait: 0
+  switchN3DSUseMultiView: 0
+  m_ActiveInputHandler: 1
