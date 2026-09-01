@@ -18,9 +18,6 @@ permissions:
   pages: write
   id-token: write
 
-authorization:
-  contents: read
-
 concurrency:
   group: godot-web-${{ github.ref }}
   cancel-in-progress: true
