@@ -23,7 +23,8 @@ namespace RealmWars3D
             float h = 58f;
             float y = Screen.height - h - 10f;
             float x = 10f;
-            float w = Mathf.Min(190f, (Screen.width - 50f) / 4f);
+            float gap = 10f;
+            float w = Mathf.Max(110f, (Screen.width - 50f) / 4f);
             DrawTrainButton(ref x, y, w, h, "Villager · 50F", new ResourceCost { food = 50 }, "villager");
             DrawTrainButton(ref x, y, w, h, "Militia · 60F 20G", new ResourceCost { food = 60, gold = 20 }, "militia");
             DrawTrainButton(ref x, y, w, h, "Archer · 30W 40G", new ResourceCost { wood = 30, gold = 40 }, "archer");
@@ -42,23 +43,24 @@ namespace RealmWars3D
 
         private void Train(string type, ResourceCost cost)
         {
-            if (!economy.Spend(cost)) return;
-            economy.GetType();
-            var townCenter = Object.FindFirstObjectByType<TownCenter>();
-            if (townCenter == null) return;
-            var position = townCenter.transform.position + new Vector3(6f, 0.8f, 5f);
+            if (!economy.TryAddPopulation(cost)) return;
+            var townCenters = Object.FindObjectsByType<TownCenter>(FindObjectsSortMode.None);
+            TownCenter playerTownCenter = null;
+            foreach (var tc in townCenters)
+                if (tc.IsPlayer) { playerTownCenter = tc; break; }
+            if (playerTownCenter == null) return;
+
+            var position = playerTownCenter.transform.position + new Vector3(6f, 0.8f, 5f);
             var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             go.name = UnitDefinitions.All[type].Name;
             go.transform.position = position;
             go.transform.localScale = Vector3.one * 1.2f;
-            var renderer = go.GetComponent<Renderer>();
             var material = new Material(Shader.Find("Standard"));
             material.color = type == "archer" ? Color.green : type == "militia" ? Color.red : type == "knight" ? new Color(0.86f, 0.62f, 0.12f) : Color.blue;
-            renderer.sharedMaterial = material;
+            go.GetComponent<Renderer>().sharedMaterial = material;
             var unit = go.AddComponent<Unit>();
             var def = UnitDefinitions.All[type];
             unit.Initialize(type, 0, def.Hp, def.Damage, def.Range);
-            typeof(Economy).GetProperty(nameof(Economy.Population))?.SetValue(economy, economy.Population + 1);
         }
     }
 }
