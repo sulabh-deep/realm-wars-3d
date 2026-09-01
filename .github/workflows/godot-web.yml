@@ -5,13 +5,13 @@ on:
     branches: [godot-migration]
     paths:
       - 'Godot/**'
-      - 'assets/**'
+      - 'assets-src/**'
       - '.github/workflows/godot-web.yml'
   pull_request:
     branches: [godot-migration]
     paths:
       - 'Godot/**'
-      - 'assets/**'
+      - 'assets-src/**'
       - '.github/workflows/godot-web.yml'
   workflow_dispatch:
 
@@ -28,7 +28,7 @@ env:
   GODOT_VERSION: '4.5.2'
   GODOT_DIR: Godot
   OUTPUT_DIR: build/web
-  SOURCE_ASSETS: assets
+  SOURCE_ASSETS: assets-src
 
 jobs:
   build-web:
@@ -63,7 +63,7 @@ jobs:
           find /tmp/templates -type f -name 'web_nothreads_release.zip' -exec cp {} "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/" \;
           test -f "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/web_nothreads_release.zip"
 
-      - name: Prepare provided 3D models
+      - name: Prepare original 3D models
         shell: bash
         run: |
           set -euo pipefail
@@ -78,14 +78,14 @@ jobs:
             input="$SOURCE_ASSETS/$spec"
             output="/tmp/realm-wars-models/$(basename "$spec")"
             test -s "$input"
-            echo "Converting $input"
+            echo "Converting original $input"
             timeout 120 node "$GODOT_DIR/tools/decompress-glb.mjs" "$input" "$output"
             test -s "$output"
           done
           cp /tmp/realm-wars-models/stage1.glb "$GODOT_DIR/assets/town-center/stage1.glb"
           cp /tmp/realm-wars-models/tree.glb "$GODOT_DIR/assets/resources/tree.glb"
           cp /tmp/realm-wars-models/gold-vein.glb "$GODOT_DIR/assets/resources/gold-vein.glb"
-          echo 'Prepared provided models without Draco compression.'
+          echo 'Original source models prepared for Godot.'
 
       - name: Import project
         shell: bash
