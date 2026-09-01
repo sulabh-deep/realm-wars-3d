@@ -26,12 +26,12 @@ namespace RealmWars3D
         {
             var mouse = Mouse.current;
             if (mouse == null) return;
-            if (mouse.rightButton.wasPressedThisFrame)
+            if (mouse.middleButton.wasPressedThisFrame)
             {
                 dragging = true;
                 lastPointer = mouse.position.ReadValue();
             }
-            if (mouse.rightButton.wasReleasedThisFrame)
+            if (mouse.middleButton.wasReleasedThisFrame)
                 dragging = false;
             if (!dragging) return;
             var current = mouse.position.ReadValue();
