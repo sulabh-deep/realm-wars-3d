@@ -34,7 +34,7 @@ jobs:
   build-web:
     name: Build and deploy Web
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -92,7 +92,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$GODOT_DIR/$OUTPUT_DIR"
-          timeout 300 godot --headless --path "$GODOT_DIR" --editor --quit 2>&1 | tee /tmp/godot-import.log
+          timeout 900 godot --headless --path "$GODOT_DIR" --editor --quit 2>&1 | tee /tmp/godot-import.log
           if grep -qE '^ERROR:|SCRIPT ERROR:|Parse Error:|ERROR: Failed to load script' /tmp/godot-import.log; then
             echo 'Godot reported import/script errors.'
             exit 1
